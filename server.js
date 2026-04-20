@@ -1,25 +1,19 @@
 const express = require('express');
-const { RouterOSClient } = require('routeros-client');
+const RouterOSClient = require('routeros-client').RouterOSClient;
 const path = require('path');
 
 const app = express();
 app.use(express.json());
-
-// ✅ Serve frontend files (index.html, css, js)
 app.use(express.static(path.join(__dirname)));
 
-// 🔐 MikroTik credentials
 const MT_HOST = "123.49.45.77";
 const MT_USER = "admin";
-const MT_PASS = "n7337*73"; // ⚠️ change or use env later
+const MT_PASS = "pass*73";
 
-// 🔢 Generate Bxxx username
 function generateUsername() {
-    const num = Math.floor(100 + Math.random() * 900);
-    return "B" + num;
+    return "B" + Math.floor(100 + Math.random() * 900);
 }
 
-// 🚀 API endpoint
 app.post('/create-user', async (req, res) => {
     const username = generateUsername();
     const password = "1234";
@@ -28,27 +22,25 @@ app.post('/create-user', async (req, res) => {
         host: MT_HOST,
         user: MT_USER,
         password: MT_PASS,
+        port: 8728
     });
 
     try {
         const conn = await client.connect();
 
-        const um = conn.menu("/user-manager/user");
+        const um = conn.menu("/ip/hotspot/user");
 
         await um.add({
             name: username,
-            password: password,
-            group: "default"
+            password: password
         });
 
-        // ✅ Send response FIRST (important for stability)
         res.json({
             success: true,
             username,
             password
         });
 
-        // ✅ Then close connection
         await client.close();
 
     } catch (err) {
@@ -59,12 +51,10 @@ app.post('/create-user', async (req, res) => {
             error: err.message
         });
 
-        // Ensure connection closes even on error
         try { await client.close(); } catch {}
     }
 });
 
-// 🌐 Dynamic port (Render compatible)
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
