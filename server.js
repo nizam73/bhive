@@ -1,23 +1,25 @@
 const express = require('express');
-const cors = require('cors');
 const { RouterOSClient } = require('routeros-client');
-
-const PORT = process.env.PORT || 3000;
+const path = require('path');
 
 const app = express();
 app.use(express.json());
-app.use(cors());
 
+// ✅ Serve frontend files (index.html, css, js)
+app.use(express.static(path.join(__dirname)));
+
+// 🔐 MikroTik credentials
 const MT_HOST = "123.49.45.77";
 const MT_USER = "admin";
-const MT_PASS = "n7337*73"; // change this
+const MT_PASS = "yourpassword"; // ⚠️ change or use env later
 
-// Generate Bxxx username
+// 🔢 Generate Bxxx username
 function generateUsername() {
     const num = Math.floor(100 + Math.random() * 900);
     return "B" + num;
 }
 
+// 🚀 API endpoint
 app.post('/create-user', async (req, res) => {
     const username = generateUsername();
     const password = "1234";
@@ -29,34 +31,41 @@ app.post('/create-user', async (req, res) => {
     });
 
     try {
-        // Handle client errors
-        client.on('error', (err) => {
-            console.error('RouterOS Client Error:', err.message);
-        });
-
         const conn = await client.connect();
 
         const um = conn.menu("/user-manager/user");
 
-        // MATCHING YOUR CLI COMMAND
         await um.add({
             name: username,
             password: password,
             group: "default"
         });
 
+        // ✅ Send response FIRST (important for stability)
         res.json({
             success: true,
             username,
             password
         });
 
+        // ✅ Then close connection
+        await client.close();
+
     } catch (err) {
-        console.error('Error:', err.message);
-        res.status(500).json({ error: err.message });
+        console.log("ERROR:", err);
+
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+
+        // Ensure connection closes even on error
+        try { await client.close(); } catch {}
     }
 });
 
+// 🌐 Dynamic port (Render compatible)
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
     console.log("Server running on port " + PORT);
