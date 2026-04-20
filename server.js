@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname)));
 // 🔐 MikroTik credentials
 const MT_HOST = "123.49.45.77";
 const MT_USER = "admin";
-const MT_PASS = "yourpassword"; // ⚠️ change or use env later
+const MT_PASS = "n7337*73"; // ⚠️ change or use env later
 
 // 🔢 Generate Bxxx username
 function generateUsername() {
