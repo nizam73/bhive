@@ -8,7 +8,7 @@ app.use(express.static(path.join(__dirname)));
 
 const MT_HOST = "123.49.45.77";
 const MT_USER = "admin";
-const MT_PASS = "pass*73";
+const MT_PASS = "n7337*73";
 
 function generateUsername() {
     return "B" + Math.floor(100 + Math.random() * 900);
