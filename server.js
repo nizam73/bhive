@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { RouterOSClient } = require('routeros-client');
 
+const PORT = process.env.PORT || 3000;
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -55,6 +57,7 @@ app.post('/create-user', async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log("Server running at http://localhost:3000");
+
+app.listen(PORT, () => {
+    console.log("Server running on port " + PORT);
 });
